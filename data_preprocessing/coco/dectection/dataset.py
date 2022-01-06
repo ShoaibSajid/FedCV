@@ -20,8 +20,8 @@ from torch.utils.data import Dataset
 from tqdm import tqdm
 import sys
 
-from fedml_api.model.object_detection.yolov5.utils.general import xyxy2xywh, xywh2xyxy
-from fedml_api.model.object_detection.yolov5.utils.torch_utils import torch_distributed_zero_first
+from model.yolov5.utils.general import xyxy2xywh, xywh2xyxy
+from model.yolov5.utils.torch_utils import torch_distributed_zero_first
 
 # Parameters
 help_url = 'https://github.com/ultralytics/yolov5/wiki/Train-Custom-Data'

@@ -8,7 +8,7 @@ import torch
 import numpy as np
 import torch.utils.data as data
 import torchvision.transforms as transforms
-from .datasets import create_dataloader
+from .dataset import create_dataloader
 from pathlib import Path
 
 # def partition_data(data_path, partition, n_nets):
