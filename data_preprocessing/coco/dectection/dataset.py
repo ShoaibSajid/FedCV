@@ -419,7 +419,7 @@ class LoadImagesAndLabels(Dataset):  # for training/testing
             self.label_files = [self.label_files[i-1] for i in net_dataidx_map]
 
         self.shapes = np.array(self.shapes, dtype=np.float64)
-        print("after shapes:", self.shapes, len(self.shapes))
+        # print("after shapes:", self.shapes, len(self.shapes))
         if single_cls:
             for x in self.labels:
                 x[:, 0] = 0

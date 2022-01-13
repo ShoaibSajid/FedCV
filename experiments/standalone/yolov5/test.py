@@ -11,15 +11,20 @@ from tqdm import tqdm
 
 import sys
 sys.path.append('fedml/FedML-master')
+sys.path.append('../../../')
 
-from fedml_api.model.object_detection.yolov5.models.experimental import attempt_load
-from fedml_api.model.object_detection.yolov5.utils.datasets import create_dataloader
-from fedml_api.model.object_detection.yolov5.utils.general import coco80_to_coco91_class, check_dataset, check_file, check_img_size, box_iou, \
-    non_max_suppression, scale_coords, xyxy2xywh, xywh2xyxy, set_logging, increment_path
-from fedml_api.model.object_detection.yolov5.utils.loss import compute_loss
-from fedml_api.model.object_detection.yolov5.utils.metrics import ap_per_class, ConfusionMatrix
-from fedml_api.model.object_detection.yolov5.utils.plots import plot_images, output_to_target, plot_study_txt
-from fedml_api.model.object_detection.yolov5.utils.torch_utils import select_device, time_synchronized
+from model.yolov5.models.experimental import attempt_load
+from model.yolov5.utils.datasets import create_dataloader
+from model.yolov5.utils.loss import ComputeLoss as compute_loss
+from model.yolov5.utils.plots import plot_images, output_to_target
+from model.yolov5.utils.plots import plot_val_study as plot_study_txt
+from model.yolov5.utils.torch_utils import select_device
+from model.yolov5.utils.torch_utils import time_sync as time_synchronized
+from model.yolov5.utils.metrics import ap_per_class, ConfusionMatrix
+from model.yolov5.utils.general import coco80_to_coco91_class, check_dataset, check_file, check_img_size
+from model.yolov5.utils.general import non_max_suppression, scale_coords, xyxy2xywh, xywh2xyxy, set_logging, increment_path
+from model.yolov5.utils.metrics import box_iou
+
 
 
 def test(data,

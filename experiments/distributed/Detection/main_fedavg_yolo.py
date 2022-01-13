@@ -42,7 +42,7 @@ from model.yolov5.utils.general import labels_to_class_weights, increment_path, 
     fitness, strip_optimizer, get_latest_run, check_dataset, check_file, check_git_status, check_img_size, \
     print_mutation, set_logging
 from model.yolov5.utils.google_utils import attempt_download
-from model.yolov5.utils.loss import ComputeLoss as compute_loss
+from model.yolov5.utils.loss import ComputeLoss
 from model.yolov5.utils.plots import plot_images, plot_labels, plot_results
 from model.yolov5.utils.plots import plot_evolve as plot_evolution
 from model.yolov5.utils.torch_utils import ModelEMA, select_device, torch_distributed_zero_first
@@ -314,8 +314,8 @@ if __name__ == '__main__':
     ema = ModelEMA(model) if rank in [-1, 0] else None
 
     # DDP mode
-    if cuda and rank != -1:
-        model = DDP(model, device_ids=[opt.local_rank], output_device=opt.local_rank)
+    # if cuda and rank != -1:
+    #     model = DDP(model, device_ids=[opt.local_rank], output_device=opt.local_rank)
 
 
     # fedml
@@ -360,19 +360,27 @@ if __name__ == '__main__':
     opt.hyp = hyp  # add hyperparameters
     # if process_id == 0:
     # wandb = opt.wandb
-    if wandb and wandb.run is None:
-        wandb.init(config=opt, resume="allow",
-                           project='fedml_yolov5_new' if opt.project == 'runs/train' else Path(opt.project).stem,
-                           name=save_dir.stem,
-                           id=str(process_id + 12000).encode('utf-8'))
-    opt.wandb = wandb
+    # if wandb and wandb.run is None:
+    #     wandb.init(config=opt, resume="allow",
+    #                        project='fedml_yolov5_new' if opt.project == 'runs/train' else Path(opt.project).stem,
+    #                        name=save_dir.stem,
+    #                        id=str(process_id + 12000).encode('utf-8'))
+    # opt.wandb = wandb
 
+        
+
+    FedML_FedAvg_distributed(process_id, worker_number, device, comm,
+                            model, train_data_num, train_data_global, test_data_global,
+                            train_data_local_num_dict, train_data_local_dict, test_data_local_dict, opt)
+    
     try:
     # start "federated averaging (FedAvg)"
         print("start distributed")
         FedML_FedAvg_distributed(process_id, worker_number, device, comm,
                              model, train_data_num, train_data_global, test_data_global,
-                             train_data_local_num_dict, train_data_local_dict, test_data_local_dict, opt, None, True, hyp)
+                             train_data_local_num_dict, train_data_local_dict, test_data_local_dict, opt)
+        
+            
     except Exception as e:
         print(e)
         logging.info('traceback.format_exc():\n%s' % traceback.format_exc())

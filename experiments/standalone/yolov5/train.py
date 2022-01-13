@@ -10,6 +10,7 @@ from warnings import warn
 import collections
 import sys
 sys.path.append('fedml/FedML-master')
+sys.path.append('../../..')
 
 
 import math
@@ -29,23 +30,26 @@ from tqdm import tqdm
 
 import test  # import test.py to get mAP after each epoch
 # from fedml_api.model.object_detection.yolov5.models.experimental import
-from fedml_api.model.object_detection.yolov5.models.experimental import attempt_load
-from fedml_api.model.object_detection.yolov5.models.yolo import Model
-from models.yolo import Model
-from fedml_api.model.object_detection.yolov5.utils.autoanchor import check_anchors
+from model.yolov5.models.yolo import Model
+# from models.yolo import Model
+from model.yolov5.utils.autoanchor import check_anchors
 # from utils.datasets import create_dataloader
-from fedml_api.model.object_detection.yolov5.utils.general import labels_to_class_weights, increment_path, labels_to_image_weights, init_seeds, \
+from model.yolov5.utils.general import labels_to_class_weights, increment_path, labels_to_image_weights, init_seeds, \
     fitness, strip_optimizer, get_latest_run, check_dataset, check_file, check_git_status, check_img_size, \
     print_mutation, set_logging
-from fedml_api.model.object_detection.yolov5.utils.google_utils import attempt_download
-from fedml_api.model.object_detection.yolov5.utils.loss import compute_loss
-from fedml_api.model.object_detection.yolov5.utils.plots import plot_images, plot_labels, plot_results, plot_evolution
-from fedml_api.model.object_detection.yolov5.utils.torch_utils import ModelEMA, select_device, intersect_dicts, torch_distributed_zero_first
+from model.yolov5.utils.google_utils import attempt_download
+from model.yolov5.utils.loss import ComputeLoss as compute_loss
+from model.yolov5.utils.plots import plot_images, plot_labels, plot_results
+from model.yolov5.utils.plots import plot_evolve as plot_evolution
+from model.yolov5.utils.torch_utils import ModelEMA, select_device, torch_distributed_zero_first
+from model.yolov5.utils.torch_utils import intersect_dicts
 
-from fedml_api.data_preprocessing.coco_detection.datasets import partition_data
-from fedml_api.data_preprocessing.coco_detection.datasets import create_dataloader
-from fedml_api.standalone.fedavg_yolo.client import Client
+from data_preprocessing.coco.dectection.dataset import partition_data
+from data_preprocessing.coco.dectection.dataset import create_dataloader
+# from FedML.fedml_api.standalone.fedavg_yolo.client import Client
 logger = logging.getLogger(__name__)
+
+
 
 sys.path.insert(0, 'fedml/FedML-master/fedml_api/standalone/fedavg_yolo/data/')
 

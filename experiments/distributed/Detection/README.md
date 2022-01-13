@@ -29,7 +29,9 @@ PYTHON=${17}
 ```
 train on IID dataset (eg:coco128,4 clients)
 ```
-sh run_fedavg_distributed_pytorch.sh 4 4 1 2 ./data/coco128.yaml homo 300 1 4 0.01 FedCV/model/detection/models/yolov5s.yaml 0 FedCV/model/detection/models/yolov5s.pt 0 0,1
+sh run_fedavg_distributed_pytorch.sh 4 4 1 2 ./data/coco128.yaml homo 300 1 4 0.01 experiments/distributed/Detection/models/yolov5s.yaml 0 experiments/distributed/Detection/yolov5s.pt 0 0,1
+sh run_fedavg_distributed_pytorch.sh 4 4 1 2 ./data/coco128.yaml homo 300 1 4 0.01 0 0 0,1
+sh run_fedavg_distributed_pytorch.sh 1 1 1 2 ./data/coco128.yaml homo 300 1 4 0.01 0 0 0,1
 ```
 ```
 ```
