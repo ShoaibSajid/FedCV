@@ -15,7 +15,7 @@ sys.path.append('../../..')
 
 from model.yolov5.models.experimental import attempt_load
 from model.yolov5.utils.datasets import create_dataloader
-from model.yolov5.utils.loss import ComputeLoss as compute_loss
+from model.yolov5.utils.loss import ComputeLoss
 from model.yolov5.utils.plots import plot_images, output_to_target
 from model.yolov5.utils.plots import plot_val_study as plot_study_txt
 from model.yolov5.utils.torch_utils import select_device
@@ -31,7 +31,7 @@ def test(data,
          batch_size=16,
          imgsz=640,
          conf_thres=0.001,
-         iou_thres=0.6,  # for NMS
+         iou_thres=0.25,  # for NMS
          save_json=False,
          single_cls=False,
          augment=False,
@@ -43,8 +43,8 @@ def test(data,
          save_hybrid=False,  # for hybrid auto-labelling
          save_conf=False,  # save auto-label confidences
          plots=True,
-         log_imgs=0):  # number of logged images
-
+         log_imgs=0,
+         opt=None):  # number of logged images
     # Initialize/load model and set device
     training = model is not None
     if training:  # called by train.py
@@ -67,7 +67,7 @@ def test(data,
         # if device.type != 'cpu' and torch.cuda.device_count() > 1:
         #     model = nn.DataParallel(model)
 
-    device = torch.device('cpu')
+    # device = torch.device('cpu')
     # Half
     half = False
     # half = device.type != 'cpu'  # half precision only supported on CUDA
@@ -76,7 +76,9 @@ def test(data,
 
     # Configure
     model = model.to(device)
+    compute_loss = ComputeLoss(model)
     model.eval()
+    
     is_coco = data.endswith('coco.yaml')  # is COCO dataset
     with open(data) as f:
         data = yaml.load(f, Loader=yaml.FullLoader)  # model dict
@@ -122,18 +124,18 @@ def test(data,
 
             # Compute loss
             if training:
-                loss += compute_loss([x.float() for x in train_out], targets, model)[1][:3]  # box, obj, cls
+                loss += compute_loss([x.float() for x in train_out], targets)[1][:3]  # box, obj, cls
 
             # Run NMS
             targets[:, 2:] *= torch.Tensor([width, height, width, height]).to(device)  # to pixels
             lb = [targets[targets[:, 0] == i, 1:] for i in range(nb)] if save_hybrid else []  # for autolabelling
             t = time_synchronized()
-            inf_out = inf_out.cpu()
+            # inf_out = inf_out.cpu()
             output = non_max_suppression(inf_out, conf_thres=conf_thres, iou_thres=iou_thres, labels=lb)
             t1 += time_synchronized() - t
 
         # Statistics per image
-        targets = targets.cpu()
+        # targets = targets.cpu()
         for si, pred in enumerate(output):
             labels = targets[targets[:, 0] == si, 1:]
             nl = len(labels)
@@ -227,13 +229,16 @@ def test(data,
     # Compute statistics
     stats = [np.concatenate(x, 0) for x in zip(*stats)]  # to numpy
     if len(stats) and stats[0].any():
-        p, r, ap, f1, ap_class = ap_per_class(*stats, plot=plots, save_dir=save_dir, names=names)
-        p, r, ap50, ap = p[:, 0], r[:, 0], ap[:, 0], ap.mean(1)  # [P, R, AP@0.5, AP@0.5:0.95]
+        # p, r, ap, f1, ap_class = ap_per_class(*stats, plot=plots, save_dir=save_dir, names=names)
+        _,  _,  p, r, f1, ap, ap_class = ap_per_class(*stats, plot=plots, save_dir=save_dir, names=names)
+        p, r, ap50, ap = p[:], r[:], ap[:, 0], ap.mean(1)  # [P, R, AP@0.5, AP@0.5:0.95]
+        # p, r, ap50, ap = p[:, 0], r[:, 0], ap[:, 0], ap.mean(1)  # [P, R, AP@0.5, AP@0.5:0.95]
         mp, mr, map50, map = p.mean(), r.mean(), ap50.mean(), ap.mean()
         nt = np.bincount(stats[3].astype(np.int64), minlength=nc)  # number of targets per class
     else:
         nt = torch.zeros(1)
 
+    # print("\n\n\n\n\n\n")
     # Print results
     pf = '%20s' + '%12.3g' * 6  # print format
     print(pf % ('all', seen, nt.sum(), mp, mr, map50, map))
@@ -280,6 +285,7 @@ def test(data,
         except Exception as e:
             print(f'pycocotools unable to run: {e}')
 
+    # print("\n\n\n\n\n\n\n\n")
     # Return results
     if not training:
         s = f"\n{len(list(save_dir.glob('labels/*.txt')))} labels saved to {save_dir / 'labels'}" if save_txt else ''

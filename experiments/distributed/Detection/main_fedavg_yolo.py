@@ -30,7 +30,7 @@ sys.path.append('../fedml/FedML-master')
 sys.path.append('../../../')
 
 
-import test  # import test.py to get mAP after each epoch
+import test as Test  # import test.py to get mAP after each epoch
 # from models.experimental import attempt_load
 # from models.yolo import Model
 
@@ -289,8 +289,10 @@ if __name__ == '__main__':
         logger.info(
             'Transferred %g/%g items from %s' % (len(state_dict), len(model.state_dict()), weights))  # report
     else:
+        logger.info("Creating model from",opt.cfg)
         model = Model(opt.cfg, ch=3, nc=nc).to(device)  # create
 
+    # print("Test",model.parameters )
     # Freeze
     freeze = []  # parameter names to freeze (full or partial)
     for k, v in model.named_parameters():
@@ -360,22 +362,61 @@ if __name__ == '__main__':
     opt.hyp = hyp  # add hyperparameters
     # if process_id == 0:
     # wandb = opt.wandb
-    # if wandb and wandb.run is None:
-    #     wandb.init(config=opt, resume="allow",
-    #                        project='fedml_yolov5_new' if opt.project == 'runs/train' else Path(opt.project).stem,
-    #                        name=save_dir.stem,
-    #                        id=str(process_id + 12000).encode('utf-8'))
-    # opt.wandb = wandb
+    if wandb and wandb.run is None:
+        wandb.init(config=opt, resume="allow",
+                           project='fedml_yolov5_new' if opt.project == 'runs/train' else Path(opt.project).stem,
+                           name=save_dir.stem,
+                           id=str(process_id + 12000).encode('utf-8'))
+    opt.wandb = wandb
+    
+    
+    # for client_idx in range(opt.client_num_in_total):
+    #     data = train_data_local_dict[client_idx]
+    #     model.to(device)
+    #     model.train()
+    #     # model.eval()
 
-        
+    #     metrics = {
+    #         'test_correct': 0,
+    #         'test_loss': 0,
+    #         'test_total': 0
+    #     }
+    #     compute_loss = ComputeLoss(model)
+                
+    #     with torch.no_grad():
+    #         for batch_idx, (x, target, _, _) in enumerate(data):
+    #             x = x.to(device)
+    #             target = target.to(device)
+    #             pred = model(x)
+    #             loss, loss_items = compute_loss(pred, target)  # loss scaled by batch_size
+    #             _, predicted = torch.max(pred, -1)
+    #             correct = predicted.eq(target).sum()
+    #             metrics['test_correct'] += correct.item()
+    #             metrics['test_loss'] += loss.item() * target.size(0)
+    #             metrics['test_total'] += target.size(0)
+                
+                
+    #     tmp_results, tmp_maps, tmp_times = Test.test(  opt.data,
+    #                                                    batch_size=total_batch_size,
+    #                                                    imgsz=opt.img_size[0],
+    #                                                    model=model,
+    #                                                    single_cls=opt.single_cls,
+    #                                                    dataloader=data,
+    #                                                    save_dir=save_dir,
+    #                                                    plots=plots and 1,
+    #                                                    log_imgs=opt.log_imgs if wandb else 0,
+    #                                                    opt=opt)
 
+
+    # print("Test",model.parameters )
     FedML_FedAvg_distributed(process_id, worker_number, device, comm,
                             model, train_data_num, train_data_global, test_data_global,
                             train_data_local_num_dict, train_data_local_dict, test_data_local_dict, opt)
-    
     try:
     # start "federated averaging (FedAvg)"
         print("start distributed")
+        
+        # print("Test",model.parameters )
         FedML_FedAvg_distributed(process_id, worker_number, device, comm,
                              model, train_data_num, train_data_global, test_data_global,
                              train_data_local_num_dict, train_data_local_dict, test_data_local_dict, opt)

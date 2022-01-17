@@ -30,4 +30,10 @@ mpirun -np $PROCESS_NUM -hostfile ./mpi_host_file python3 ./main_fedavg_yolo.py 
   --epochs $EPOCH \
   --batch_size $BATCH_SIZE \
   --lr $LR \
-  --ci $CI
+  --ci $CI \
+  --frequency_of_the_test 3
+
+
+  ################test_on_server_for_all_clients : 10
+{'training_acc': 0.001288659793814433, 'training_loss': 0.3324661733025743}
+{'test_acc': 0.001076426264800861, 'test_loss': 0.319073262220435}
